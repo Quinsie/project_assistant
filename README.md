@@ -1,31 +1,32 @@
-# Software Assistant System
+# Software Project Assistant System
 
 Status: usable cross-platform preview; not yet public-release-ready.
 
-This directory is the standalone source root of the software-development Agent
-Documentation & Assistant System. It installs the same validated documentation
-kernel as the research edition with a software-specific
-requirement → design → task → test → release semantic profile.
+This repository distributes the software-project profile of the Agent
+Documentation & Assistant System. It is not an initialized project. It
+contains Windows and POSIX launchers, the project template, deterministic
+documentation kernel, software workflow Skill, restricted gateway, validators,
+and regression suite.
 
-It is not an initialized project instance. The build contains a dependency-free
-Node runtime, Windows and POSIX launchers, installer, project template,
-validator, restricted gateway, software workflow Skill, and tests.
+The Assistant is an optional local tool. People and the project remain
+sovereign: collaborators may work without it, and out-of-band changes to code,
+documents, data, or Git history are normal project events to reconcile.
 
-Prerequisites are Node.js 20+ and Codex CLI. The restricted-zone guarantee also
-requires a working native Codex sandbox backend:
+## Requirements
 
-- Windows: the native `elevated` sandbox setup.
-- macOS: the Codex Seatbelt backend.
-- Linux: bubblewrap/user namespaces and any distribution-required policy. On
-  Ubuntu 24.04 with restricted unprivileged user namespaces, load the packaged
-  `bwrap-userns-restrict` AppArmor profile before activation.
+- Node.js 20 or later
+- Codex CLI
+- A working native Codex sandbox backend:
+  - Windows: native `elevated` sandbox setup
+  - macOS: Codex Seatbelt
+  - Linux: bubblewrap/user namespaces and distribution-required policy
 
-The assistant is an optional local tool. It does not own the project, does not
-need to be used by every collaborator, and does not make ordinary project work
-invalid when its own context is paused or absent.
+On Ubuntu 24.04 with restricted unprivileged user namespaces, load the packaged
+`bwrap-userns-restrict` AppArmor profile before activation.
 
-Initialize a project from the repository root. Existing projects require
-explicit acknowledgement of the model and token-cost notice:
+## Initialize a project
+
+Run from this repository root:
 
 ```text
 # Windows
@@ -35,8 +36,77 @@ assistant.cmd init --target <project-path> --yes
 ./assistant init --target <project-path> --yes
 ```
 
-Quote a path containing spaces in the current shell. Review and trust the
-installed project config if Codex requests it, then run the installed doctor:
+Quote paths when the shell requires it, such as when a path contains spaces.
+Provide an explicit source file or directory with repeatable `--source`:
+
+```text
+assistant.cmd init --target <project-path> --source <exact-path> --yes
+```
+
+Explicit sources are copied into immutable Assistant intake storage for that
+initialization episode. The originals remain user-owned. A source directory
+grant covers its complete bounded contents.
+
+Existing projects require acknowledgement of the model and token-cost notice.
+The default initialization selection is `gpt-5.6-sol` with `high` reasoning
+effort. `--profile` is mutually exclusive with `--model` and `--effort`.
+Long initialization prints phase and elapsed-time heartbeats. There is no
+default wall-clock timeout: the Codex session, workspace, evidence identity,
+model/profile, and effort are persisted and resumed.
+
+If repository-native AGENTS, Codex config, or Skill rules need reconciliation,
+initialization stops before semantic model work and prints an interactive Codex
+handoff. This migration changes the Assistant control route only; it does not
+move or delete referenced project documents.
+
+## Existing-project semantic migration
+
+Initialization inventories the whole project boundary. It does not assume that
+documentation lives under `docs/`, use a filename such as `MASTER_PLAN.md`, or
+infer meaning from a directory named `archive`.
+
+Knowledge-bearing text is processed as stable semantic units in resumable
+batches. Modern DOCX, PPTX, XLSX, ODT, RTF, and PDF inputs receive bounded,
+non-executing representations. Macros, embedded programs, and external
+relationships are never run. Encrypted, image-only, corrupt, oversized, or
+legacy DOC/PPT/XLS inputs become explicit gaps instead of silent omissions.
+
+Activation requires loss-aware coverage, origin-to-current lineage, explicit
+current state and authorization, preserved requirements and design evolution,
+tests and releases, failures and corrections, resolved material conflicts, and
+no live dependency on original project documents.
+
+Document candidates are classified by meaning. A spreadsheet may be a plan,
+report, inventory, or operational dataset; extension and location do not
+decide its role.
+
+## Human document cold zone
+
+After initialization:
+
+- `docs/` is human-managed cold document space.
+- The Assistant does not list, search, read, or use it during normal work.
+- An exact file or directory named in the current prompt receives a temporary,
+  purpose-bounded gateway grant.
+- `docs/report/` is the only write exception for new derived reports. Reports
+  are never canonical authority or fallback input.
+- A human document kept outside `docs/` becomes an exact cold-in-place boundary.
+
+For scattered human documents, initialization shows one whole relocation
+preview after their meaning has been integrated. It includes source,
+destination, role, canonical targets, reason, and rollback conditions. Nothing
+moves without explicit approval. Approved moves are hash-verified and recorded
+in a reversible ledger. Destination collisions, modified relocated files, and
+occupied original paths fail closed without overwrite.
+
+## Normal operation
+
+Work needing project context begins with the small orientation set and follows
+only the relevant semantic route. Canonical knowledge evolves with material
+results, decisions, blockers, authorization, and current state. Cold documents
+are not reopened as a shortcut.
+
+Run doctor after trusting the installed project configuration:
 
 ```text
 # Windows
@@ -46,27 +116,12 @@ installed project config if Codex requests it, then run the installed doctor:
 <project-path>/.assistant/system/assistant doctor --target <project-path>
 ```
 
-The CLI prints concise human output by default; add `--json` for the complete
-machine payload. Long semantic initialization reports phases and elapsed-time
-heartbeats on stderr.
+Protected workflows require doctor to report `ready`. The Codex permission
+profile and exact-grant gateway protect `docs/`, external cold documents,
+`.assistant/vault`, and internal capability data. Windows also uses NTFS ACL
+defense in depth. Activation fails closed if sandbox denial cannot be proven.
 
-Existing-project initialization first performs bounded orientation discovery
-from conventional project control surfaces, then applies only explicit,
-evidence-cited content boundaries to the semantic packet. If repository-native
-rules require migration, the CLI stops before model analysis and prints the
-exact interactive Codex handoff. Model analysis has no default wall-clock
-timeout. Its Codex session, workspace, packet identity, model/profile, and
-reasoning effort are persisted; rerunning the installed `init` command resumes
-that session without silently changing effort. A new semantic attempt requires
-an explicit restart reason.
-
-Knowledge-bearing files are processed as stable semantic units in resumable
-batches rather than a head/tail sample. Initialization cannot activate from a
-current-state-only summary: every unit needs a loss-aware disposition and
-canonical target where applicable, origin-to-current lineage must be complete,
-material document/code conflicts must be represented, and competing legacy
-control surfaces must be resolved. Canonical operation may not depend on
-reopening a live legacy master document.
+## Lifecycle and updates
 
 Lifecycle commands are preview-first:
 
@@ -77,30 +132,20 @@ assistant purge --target <project-path>
 assistant update --target <project-path>
 ```
 
-`uninstall` preserves local canonical continuity state. `export` creates a new
-hash-manifested portable snapshot and never overwrites its destination.
-`purge` removes assistant-owned local state and integration. Re-run uninstall
-or purge with `--confirm` only after reviewing the preview. Both preserve all
-project code, data, Git history, and everything under `docs/`.
+When approved relocations are active, uninstall and purge require one explicit
+layout choice: `--keep-layout` or `--restore-relocations`. Restore never
+overwrites a changed destination or occupied original. `uninstall` preserves
+local canonical continuity while removing runtime integration. `purge` removes
+Assistant-owned local state and integration. Project code, data, configuration,
+documents, and Git history are otherwise preserved.
 
-On the first prompt of each identifiable Codex session, the installed
-non-model checker requests only the configured public GitHub release metadata.
-It reports a newer version once and never updates automatically. Repeated
-prompts in the same session do not repeat the remote request; offline or failed
-checks remain silent and never block work. Disable it with the durable
-`update_check = disabled` project policy. Run `update` explicitly from the
-newly downloaded release.
+On the first prompt of each identifiable Codex session, a non-model checker
+requests only public GitHub release metadata. It reports a newer version once,
+never updates automatically, and remains silent when current or offline.
+Disable it with `update_check = disabled`; run `update` explicitly from a newly
+downloaded release.
 
-Assistant-managed protected workflows require doctor to report `ready`. Restricted source, report, vault,
-and capability paths are protected by a Codex permission profile and an
-exact-grant gateway; Windows also retains NTFS ACL defense in depth. If the
-sandbox probe cannot prove direct read and write denial, activation fails
-closed.
-
-Windows, Linux, and macOS run the same required regression suite. The current
-live-tested environments use Codex CLI 0.145 or 0.146. Use a recoverable copy
-for initial adoption. Release packaging and long-term support policy remain
-outside this preview.
+Windows, Linux, and macOS run the same required regression suite.
 
 ## Contributing and license
 
@@ -109,35 +154,32 @@ Licensed under Apache-2.0; see [LICENSE](LICENSE).
 
 ---
 
-# 소프트웨어 프로젝트 보조 시스템
+# 소프트웨어 프로젝트 어시스턴트 시스템
 
-상태: Windows, Linux, macOS에서 사용할 수 있는 프리뷰이며, 아직 공개 릴리스
-준비는 완료되지 않았습니다.
+상태: Windows, Linux, macOS에서 사용할 수 있는 프리뷰이며 아직 공개 릴리스 준비
+단계는 아닙니다.
 
-이 디렉터리는 소프트웨어 개발용 Agent Documentation & Assistant System의
-독립 소스 루트입니다. 연구용 에디션과 동일하게 검증된 문서화 커널을 사용하되,
-요구사항 → 설계 → 작업 → 테스트 → 릴리스로 이어지는 소프트웨어 전용 의미
-프로필을 설치합니다.
+이 저장소는 소프트웨어 프로젝트용 Agent Documentation & Assistant System의 배포
+원본입니다. 초기화된 프로젝트 자체가 아니라 실행기, 프로젝트 템플릿, 문서 운영
+커널, 소프트웨어 워크플로 Skill, 제한 구역 gateway, validator와 회귀 테스트를
+제공합니다.
 
-초기화된 프로젝트 자체가 아닙니다. 의존성 없는 Node 런타임, Windows와 POSIX
-실행기, 설치 프로그램, 프로젝트 템플릿, validator, 제한 구역 게이트웨이,
-소프트웨어 워크플로 Skill 및 테스트를 포함합니다.
+Assistant는 선택적인 로컬 보조 도구입니다. 사람과 프로젝트가 항상 주체이며,
+Assistant 없이 수행한 코드·문서·데이터·Git 변경도 정상적인 프로젝트 사건으로
+인식하고 이후 상태를 조율합니다.
 
-요구 사항은 Node.js 20 이상과 Codex CLI입니다. 제한 구역을 보장하려면
-운영체제별 Codex sandbox backend도 정상 동작해야 합니다.
+## 요구 환경
 
-- Windows: 네이티브 `elevated` sandbox 설정
-- macOS: Codex Seatbelt backend
-- Linux: bubblewrap, user namespace 및 배포판이 요구하는 보안 정책. 제한된
-  unprivileged user namespace를 사용하는 Ubuntu 24.04에서는 활성화 전에
-  패키지의 `bwrap-userns-restrict` AppArmor profile을 load해야 합니다.
+- Node.js 20 이상
+- Codex CLI
+- 운영체제별 Codex sandbox backend
+  - Windows: native `elevated` sandbox 설정
+  - macOS: Codex Seatbelt
+  - Linux: bubblewrap/user namespace와 배포판별 보안 정책
 
-이 assistant는 선택적인 local 도구입니다. 프로젝트를 소유하지 않으며 모든
-협업자가 사용해야 하는 것도 아닙니다. assistant 문맥이 중단되거나 없어도
-사람의 일반적인 프로젝트 작업은 정상입니다.
+## 프로젝트 초기화
 
-저장소 루트에서 다음 명령으로 프로젝트를 초기화합니다. 기존 프로젝트는
-model과 token 비용 안내를 명시적으로 확인해야 합니다.
+이 저장소 루트에서 실행합니다.
 
 ```text
 # Windows
@@ -147,74 +189,72 @@ assistant.cmd init --target <프로젝트-경로> --yes
 ./assistant init --target <프로젝트-경로> --yes
 ```
 
-경로에 공백이 있으면 현재 shell 규칙에 따라 따옴표로 감싸십시오. Codex가
-요청하면 설치된 프로젝트 설정을 검토하고 신뢰한 뒤 설치된 doctor를 실행합니다.
+경로에 공백이 있는 등 현재 shell이 요구할 때 따옴표로 감쌉니다. 정확한 초기
+자료는 `--source <정확한-경로>`를 반복해 지정할 수 있습니다. 지정된 자료는 해당
+초기화 episode의 immutable intake에 복사되며 원본의 소유권과 위치는 유지됩니다.
 
-```text
-# Windows
-<프로젝트-경로>\.assistant\system\assistant.cmd doctor --target <프로젝트-경로>
+기존 프로젝트 초기화는 model/token 비용 안내 확인이 필요합니다. 기본값은
+`gpt-5.6-sol`과 `high` reasoning effort입니다. `--profile`은 `--model`,
+`--effort`와 함께 사용할 수 없습니다. 장시간 작업은 단계와 경과 시간을 계속
+알리며 기본 시간 제한 없이 같은 Codex session과 evidence identity를 이어갑니다.
 
-# Linux 또는 macOS
-<프로젝트-경로>/.assistant/system/assistant doctor --target <프로젝트-경로>
-```
+기존 AGENTS, Codex 설정, Skill 규칙의 조율이 필요하면 semantic 분석 전에 멈추고
+interactive Codex에서 수행할 정확한 안내를 출력합니다. 이 단계는 Assistant 제어
+경로만 조율하며 참조된 프로젝트 문서를 이동하거나 삭제하지 않습니다.
 
-CLI는 기본적으로 짧은 사용자용 결과를 출력하며, 전체 machine payload가
-필요할 때만 `--json`을 추가합니다. 오래 걸리는 semantic initialization은
-stderr에 현재 단계와 경과시간 heartbeat를 표시합니다.
+## 기존 프로젝트 의미 이관
 
-기존 프로젝트 초기화는 먼저 일반적인 프로젝트 제어 문서만 제한적으로
-확인하고, 명시적인 근거가 있는 접근 경계만 semantic packet에 적용합니다.
-저장소 고유 규칙의 migration이 필요하면 모델 분석 전에 멈추고, 사용자가
-어느 경로에서 Codex를 열어 어떤 요청을 보내야 하는지 안내합니다. 모델
-분석에는 기본 시간 제한이 없습니다. Codex session, 작업공간, packet 식별자,
-model/profile, reasoning effort를 영속화하며, 설치된 `init` 명령을 다시
-실행하면 effort를 임의로 바꾸지 않고 같은 session을 재개합니다. 새 semantic
-시도는 명시적인 restart 사유가 있을 때만 시작합니다.
+초기화는 프로젝트 전체 경계를 조사합니다. 문서가 `docs/`에 있다고 가정하거나
+`MASTER_PLAN.md`, `archive` 같은 이름에 특별한 의미를 하드코딩하지 않습니다.
 
-지식을 담을 수 있는 파일은 head/tail 표본이 아니라 안정적인 의미 단위와
-재개 가능한 batch로 처리합니다. 현재 상태만 축약한 결과로는 초기화를
-활성화할 수 없습니다. 모든 의미 단위에 loss-aware disposition과 필요한
-canonical target이 있어야 하고, 시작부터 현재까지의 계보가 완전해야 하며,
-중요한 문서·코드 모순과 경쟁하는 기존 제어 문서가 해결되어야 합니다.
-정상 canonical 작업은 기존 master 문서를 다시 여는 fallback에 의존할 수
-없습니다.
+지식이 있는 자료는 안정적인 semantic unit와 재개 가능한 batch로 처리합니다.
+DOCX, PPTX, XLSX, ODT, RTF, PDF는 코드를 실행하지 않는 제한된 표현으로
+추출합니다. 매크로와 외부 관계는 실행하지 않습니다. 암호화·이미지 전용·손상·
+과대 크기·legacy DOC/PPT/XLS는 누락하지 않고 명시적인 gap으로 기록합니다.
 
-수명주기 명령은 모두 preview가 기본입니다.
+활성화 전에는 의미 보전 coverage, 시작부터 현재까지의 lineage, 요구사항·설계·
+테스트·릴리스·실패·수정 이력, 현재 상태와 권한, 충돌 해결, 원문에 의존하지 않는
+closed-book 동작을 검증합니다. 문서 후보는 확장자나 위치가 아니라 실제 역할로
+분류합니다.
 
-```text
-assistant uninstall --target <프로젝트-경로>
-assistant export --target <프로젝트-경로> --output <프로젝트-밖-경로>
-assistant purge --target <프로젝트-경로>
-assistant update --target <프로젝트-경로>
-```
+## 사람 문서 cold zone
 
-`uninstall`은 local canonical continuity state를 보존합니다. `export`는 hash
-manifest가 있는 새 portable snapshot을 만들며 기존 목적지를 덮어쓰지
-않습니다. `purge`는 assistant가 소유한 local state와 integration을 제거합니다.
-preview를 확인한 뒤에만 `--confirm`으로 uninstall 또는 purge를 다시
-실행하십시오. 두 제거 명령은 project code, data, Git history와 `docs/`
-아래의 모든 내용을 보존합니다.
+초기화 후에는 다음이 적용됩니다.
 
-설치된 non-model checker는 식별 가능한 Codex 세션의 첫 프롬프트에서만 설정된
-공개 GitHub release metadata를 요청합니다. 같은 세션의 후속 프롬프트는 원격
-요청을 반복하지 않습니다. 새 버전을 한 번만 알리고 자동 update는 하지 않으며,
-오프라인이거나 확인에 실패해도 작업을 막지 않고 조용히 넘어갑니다.
-durable project policy에서 `update_check = disabled`로 끌 수 있습니다. 새로
-내려받은 release에서 `update`를 명시적으로 실행하십시오.
+- `docs/`는 사람이 자유롭게 관리하는 cold document 공간입니다.
+- Assistant는 정상 작업에서 그 안을 목록화·검색·열람·참조하지 않습니다.
+- 현재 prompt가 정확히 지정한 파일이나 디렉터리만 목적이 제한된 임시 grant를
+  받습니다.
+- `docs/report/`만 새 파생 보고서를 쓰는 예외이며 보고서는 정규 권위가 아닙니다.
+- `docs/` 밖에 유지하기로 한 사람 문서는 정확한 cold-in-place 경계가 됩니다.
 
-assistant가 보호된 워크플로를 사용하려면 doctor가 `ready`를 보고해야 합니다. 제한된 source,
-report, vault 및 capability 경로는 Codex permission profile과 정확한 경로만
-허용하는 gateway로 보호합니다. Windows에서는 NTFS ACL도 심층 방어로
-유지합니다. sandbox probe가 직접 읽기·쓰기 차단을 입증하지 못하면
-활성화되지 않습니다.
+흩어진 문서는 의미 통합 후 한 번의 전체 relocation preview로 제안합니다. 현재
+경로, 목적지, 역할, 정규 지식 대상, 이유, 복구 조건을 보여주며 명시적 승인 전에는
+이동하지 않습니다. 승인된 이동은 hash 검증과 가역 ledger를 사용하고 충돌이나
+사후 수정이 발견되면 덮어쓰지 않고 중단합니다.
 
-Windows, Linux, macOS는 동일한 필수 회귀 테스트를 실행합니다. 현재 실제
-환경에서는 Codex CLI 0.145와 0.146을 검증했습니다. 처음 적용할 때는 복구
-가능한 프로젝트 사본을 사용하십시오. 릴리스 패키징과 장기 지원 정책은 아직
-이 프리뷰 범위 밖입니다.
+## 정상 운영과 생명주기
 
-## 기여 및 라이선스
+프로젝트 문맥이 필요한 작업은 작은 orientation set에서 시작해 관련 semantic
+route만 따릅니다. 중요한 결과·결정·blocker·권한·현재 상태가 변할 때 정규 지식을
+갱신하며 cold 문서를 편의상 다시 여는 fallback은 금지됩니다.
 
-보호된 `main` 브랜치의 작업 절차는 [CONTRIBUTING.md](CONTRIBUTING.md)를
-참조하십시오. Apache-2.0 라이선스를 적용하며, 자세한 내용은
-[LICENSE](LICENSE)를 참조하십시오.
+보호 워크플로를 사용하기 전 `doctor`가 `ready`인지 확인합니다. Codex permission
+profile과 exact-grant gateway가 `docs/`, 외부 cold 문서, `.assistant/vault`,
+내부 capability 자료를 보호합니다. Windows는 NTFS ACL도 방어층으로 사용합니다.
+
+`uninstall`, `export`, `purge`, `update`는 먼저 preview를 제공합니다. relocation이
+남아 있으면 제거 시 `--keep-layout` 또는 `--restore-relocations`를 명시해야 하며,
+복구는 수정된 목적지나 이미 사용 중인 원래 경로를 덮어쓰지 않습니다. 그 외
+프로젝트 코드·데이터·설정·문서·Git 이력은 보존됩니다.
+
+식별 가능한 Codex session의 첫 prompt에서는 모델을 사용하지 않는 checker가 공개
+GitHub 릴리스 metadata만 확인합니다. 새 버전이 있을 때 한 번 알릴 뿐 자동
+업데이트하지 않으며 최신이거나 offline이면 조용히 끝납니다.
+
+Windows, Linux, macOS는 동일한 필수 회귀 테스트를 실행합니다.
+
+## 기여와 라이선스
+
+보호된 `main` 작업 절차는 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하십시오.
+Apache-2.0 라이선스이며 자세한 내용은 [LICENSE](LICENSE)에 있습니다.

@@ -158,6 +158,7 @@ function softwareOutput() {
     ],
     coverage_groups: [],
     semantic_coverage: [],
+    document_assets: [],
     legacy_surfaces: [],
     lineage: {
       origin_ids: ["FND-SW-001"],
@@ -296,6 +297,18 @@ test("blank software installation selects only software profile assets", async (
         path.join(target, ".assistant", "system", "software-schema.md")
       ),
       true
+    );
+    assert.equal(
+      await pathExists(path.join(target, "docs", "report")),
+      true
+    );
+    assert.equal(
+      await pathExists(path.join(target, "docs", "user")),
+      false
+    );
+    assert.match(
+      await readFile(path.join(target, ".codex", "config.toml"), "utf8"),
+      /"docs"\s*=\s*"deny"/
     );
     assert.equal((await validateProject(target)).valid, true);
     const doctor = await doctorProject(target, { probeSandbox: false });

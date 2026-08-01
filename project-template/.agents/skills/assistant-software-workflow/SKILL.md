@@ -5,54 +5,51 @@ description: Maintain durable software requirements, designs, tasks, tests, issu
 
 # Software workflow
 
-Use this Skill for durable project meaning. Short answers, transient analysis,
+Use this skill for durable project meaning. Short answers, transient analysis,
 and trivial maintenance do not require a canonical node.
 
 1. Read `.assistant/INDEX.md` and `.assistant/CURRENT.md`.
-2. Resolve the exact semantic entity route and the policy slices for intended
-   side effects. Do not inspect `docs/user/`, `docs/report/`,
-   `.assistant/vault/`, or another restricted boundary without a current
-   gateway grant.
+2. Resolve the exact semantic route and effective policy. Do not inspect
+   `docs/`, an external cold document boundary, or `.assistant/vault/` without
+   a current exact-path gateway grant. `docs/report/` is write-only except when
+   the user names an exact report for review, edit, or comparison.
 3. Read `.assistant/system/software-schema.md` completely.
 4. Classify the instruction as addition, refinement, conflict, supersession,
-   continuation, stop, replacement, or unrelated substantial work. Give the
-   user concise transition feedback before changing active-work priority.
+   continuation, stop, replacement, or unrelated substantial work. Give
+   concise transition feedback before changing active-work priority.
 5. If meaning conflicts materially with north star, scope, requirement,
    design, plan, state, authorization, active work, release gate, or terminal
    disposition, stage the whole change and ask before changing active owners.
 6. Otherwise update the smallest owner. Preserve stable IDs and typed
    relations. A parent owns status and routes, not copied child results.
-7. Create a durable owner when the meaning first needs independent lifecycle,
+7. Create a durable owner when meaning first needs independent lifecycle,
    authority, state, or selective routing. Keep co-routed small records in a
-   bounded collection; promote without changing IDs when they become
-   independent or exceed the structure warning.
+   bounded collection; promote without changing IDs when structure warns.
 8. Treat code, tests, build output, Git state, filenames, timestamps, TODOs,
-   and artifact presence as observations. They never select current intent,
+   and artifact presence as observations. They do not select current intent,
    completion, release approval, or execution authorization by themselves.
 9. Record unknown or unverified fields explicitly. Do not invent requirements,
-   acceptance criteria, causes, test results, current branches, or release
-   authority.
+   acceptance criteria, causes, results, branches, or release authority.
 10. Update `CURRENT.md` only for current state, authorization, active work,
-    blocker, current decision, parallel/blocked route, and next safe route.
+    blocker, current decision, parallel or blocked route, and next safe route.
 11. Persist material results, blockers, decisions, authorization, plan
-    evolution, issue resolution, and test/release disposition promptly.
-12. Run `.assistant\system\assistant.cmd validate` after material canonical
-    changes. If boundedness warns, preview
-    `.assistant\system\assistant.cmd structure`, apply with `structure --apply`,
-    then validate again.
+    evolution, issue resolution, and test or release disposition promptly.
+12. Run `.assistant\system\assistant.cmd validate` after material changes. If
+    boundedness warns, preview `.assistant\system\assistant.cmd structure`,
+    apply with `structure --apply`, then validate again.
 
 ## Lifecycle direction
 
-- Requirement states what must hold and how acceptance is judged.
-- Design `implements` a requirement.
-- Task `implements` a requirement or design and may `resolve` an issue.
-- Test `verifies` a requirement, design, task, or release.
-- Release `depends_on` the tasks and tests that gate it.
-- Issue `challenges` or derives from the affected design, task, test, release,
-  environment, work, or evidence.
+- A requirement states what must hold and how acceptance is judged.
+- A design `implements` a requirement.
+- A task `implements` a requirement or design and may `resolve` an issue.
+- A test `verifies` a requirement, design, task, or release.
+- A release `depends_on` the tasks and tests that gate it.
+- An issue `challenges` or derives from an affected design, task, test,
+  release, environment, work episode, or evidence owner.
 
-Do not reverse those edges to make a graph pass. If the relation is genuinely
-unclear, leave a documentation gap.
+Do not reverse edges merely to pass validation. Leave an explicit documentation
+gap when the genuine relation is unclear.
 
 ## Work episode and report
 
@@ -60,9 +57,9 @@ unclear, leave a documentation gap.
 - For continuing work, preserve ID, authority, scope, status, stop condition,
   current state, child work, lineage, decision requirement, and report link.
 - Stop before downstream work at a gate, anomaly, material problem, user stop,
-  failed test with branching consequences, or required decision.
-- A terminal report is generated only after canonical state is current. Use
-  the locale in `.assistant/manifest.json`.
+  consequential test failure, or required decision.
+- Generate a terminal report only after canonical state is current, using the
+  locale in `.assistant/manifest.json`.
 - One terminal episode has at most one idempotent report. Include without
   repetition: Goal and authority, Why, actual and excluded work, method and
   evidence basis, factual results, interpretation and non-claims, limitations,
@@ -77,73 +74,94 @@ Use this route only when the current instruction identifies an exact source
 boundary and requests canonical integration. Review, summary, critique, or
 comparison alone must not update canonical state.
 
-1. Use only the current gateway grant. Inventory a granted directory completely
-   and do not follow links outside it.
-2. Preflight content and preserve exact bytes with `source_snapshot`. Record
-   unsupported, binary, encrypted, or oversized meaning as coverage gaps.
+1. Use only the current gateway grant. Inventory a granted directory
+   completely and do not follow links outside it.
+2. Preflight each file and preserve exact bytes with `source_snapshot`. Read
+   supported text and modern office documents through the safe bounded
+   extractor. Record unsupported legacy binary, encrypted, malformed, or
+   oversized meaning as an explicit coverage gap.
 3. Account each meaningful section as `preserved`, `consolidated`,
    `historical`, `superseded`, or `omitted_with_reason`. Preserve requirements,
    constraints, interfaces, acceptance criteria, decisions, task state, test
-   oracle/results, issues, release gates, authorization, and plan evolution.
+   oracles and results, issues, release gates, authorization, and evolution.
 4. Compare only with routed canonical owners. Do not choose authority by path,
-   name, date, mtime, Git state, or wording such as “latest.”
+   name, date, mtime, Git state, or wording such as "latest".
 5. Stage one `source_integration` transaction with affected writes, immutable
-   snapshot IDs, section coverage, and all conflicts. Canonical meaning must
-   not depend on the live source.
-6. If any conflict is material, preview the entire conflict and wait for
-   explicit confirmation. Do not apply a non-conflicting subset.
+   snapshot IDs, coverage, and all conflicts. Canonical meaning must not depend
+   on the live source.
+6. For a material conflict, preview the entire conflict and wait for explicit
+   confirmation. Do not apply only a non-conflicting subset.
 7. Commit atomically, maintain structure, validate, and re-route with source,
-   reports, and vault hidden. A failed closed-book route is a documentation gap,
-   not a completed integration.
+   reports, and vault hidden. A failed closed-book route is a documentation
+   gap, not a completed integration.
 
 ## Existing-project bootstrap resolution
 
-When `CURRENT.md` names `BOOTSTRAP-EXISTING` and
-`awaiting_user_input`, pause assistant-managed canonical integration before
-relying on it. The project and its human collaborators are not blocked. Resolve an
-`agents_control_plane` migration first when present: retain repository-native
-build, test, safety, and subtree rules in AGENTS; move durable assistant
-side-effect preferences to `.assistant/POLICY.md` only when approved; remove
-any semantically competing current, plan, decision, authorization, policy, or
-routing owner only after preview and confirmation. Never assume fixed
-filenames or directories.
+When `CURRENT.md` names `BOOTSTRAP-EXISTING` and `awaiting_user_input`,
+assistant-managed canonical integration is paused; normal human project work
+is not blocked. Resolve `agents_control_plane` first when present. Retain
+repository-native build, test, safety, and subtree rules in AGENTS. Move
+durable Assistant side-effect preferences to `.assistant/POLICY.md` only when
+approved. Rewrite a semantically competing current, plan, decision,
+authorization, policy, or routing owner only after preview and confirmation.
+Never infer a special role from a fixed filename or directory.
 
-After the migration is confirmed, run
-`.assistant\system\assistant.cmd migration --complete-agents --confirm --json`,
-then continue the same bootstrap with
-`.assistant\system\assistant.cmd init --json` on Windows or
-`.assistant/system/assistant init --json` on POSIX. The installed runner uses
-the persisted profile or model/effort selection and a preserved Codex session
-when one exists. Never downgrade effort, add a timeout, or start a replacement
-semantic attempt without the user's explicit restart instruction and reason.
+After confirmation, run:
 
-The runner processes every knowledge-bearing text candidate as stable semantic
-units in resumable batches, then synthesizes from the validated unit ledger.
-Do not bypass incomplete unit coverage, lineage, or closed-book findings by
-opening one legacy master document as fallback authority. Preserve historical
-and superseded requirements, design choices, tests, releases, failures, and
-corrections in bounded canonical owners when they explain the project. A valid
-node count alone is not readiness.
+`.assistant\system\assistant.cmd migration --complete-agents --confirm --json`
 
-Review every staged `legacy_surfaces` entry by meaning. Preserve
-repository-native build/test instructions, user sources, reports, and ordinary
-project documents in their appropriate role. Preview and obtain approval for
-any competing-surface rewrite/move/removal; do not invent a generic archive.
-Apply an approved `integrate_then_move` or `integrate_then_remove` action before
-resolution because activation refuses a still-present live path.
+This changes only the AGENTS/POLICY control route. Do not move, delete, rename,
+or archive referenced documents at this step. Semantic bootstrap must first
+integrate their meaning and then present document placement separately.
 
-Ask at most three related semantic questions at a time. After every blocker has
-an explicit answer, create one `assistant.bootstrap-resolution/v1` package with
-one decision per initialization gap/material conflict, declared affected
-candidate IDs, complete unaffected meaning and semantic-unit coverage,
-origin-to-current lineage, resolved control-surface dispositions, a
-closed-book audit with no live legacy dependency, and a
-`canonical_user_approved` decision candidate for each material conflict.
-Confirm the whole material change, then run:
+Continue the same bootstrap with `.assistant\system\assistant.cmd init --json`
+on Windows or `.assistant/system/assistant init --json` on POSIX. Use the
+persisted model settings and Codex session. Never downgrade effort, add a
+timeout, or replace an attempt without the user's explicit restart instruction.
+
+Process every knowledge-bearing candidate as stable semantic units. Do not
+bypass incomplete unit coverage, lineage, or closed-book findings by opening a
+legacy master document as fallback authority. Preserve historical and
+superseded requirements, designs, tests, releases, failures, and corrections
+when they explain the project. A valid node count alone is not readiness.
+
+Review staged `legacy_surfaces` by observed meaning. `integrate_then_cold`
+means the meaning is canonical and the original is protected from normal
+Assistant access; it does not require movement. Preview any competing-surface
+rewrite, move, or removal. Do not invent a generic archive.
+
+Review every staged `document_assets` item. Show one whole relocation preview:
+current path, observed role, canonical targets, destination or cold-in-place
+disposition, reason, and rollback conditions. Explain that `docs/` is
+human-managed cold storage and `docs/report/` is the only report write
+interface. Ask once whether to apply the complete proposal. The user may
+change any disposition or destination. Never move before the complete semantic
+output validates and never overwrite a collision. Approved `move_to_docs` and
+`cold_in_place` items use `decision_status: approved`; reject or resolve every
+ambiguous pending item explicitly.
+
+Ask at most three related semantic questions at a time. Then create one
+temporary `assistant.bootstrap-resolution/v1` JSON package containing:
+
+- one decision for every active gap and material conflict;
+- one exact-path decision for every pending document asset;
+- affected candidate IDs and all unaffected candidate meaning;
+- complete inventory, semantic-unit coverage, and origin-to-current lineage;
+- resolved control-surface dispositions and a closed-book audit with no live
+  legacy authority dependency;
+- a `canonical_user_approved` candidate for every material conflict.
+
+Confirm the whole material change or document placement, then run:
 
 `.assistant\system\assistant.cmd bootstrap-resolve --input <exact-json-path> --confirm --json`
 
-For gap-only resolution, omit `--confirm`. After activation, claim and resume
-the durable deferred first request with `bootstrap-deferred --claim --json`,
-then mark it complete with `bootstrap-deferred --complete --json` only after
-its durable state is recorded.
+For gap-only resolution with no material conflict or document placement, omit
+`--confirm`. The command validates changes, applies the approved relocation and
+cold-boundary ledger atomically with canonical activation, maintains structure,
+and validates closed-book state.
+
+After activation, run
+`.assistant\system\assistant.cmd bootstrap-deferred --claim --json`, tell the
+user initialization is resolved and resume the original request. After durable
+state is recorded, run
+`.assistant\system\assistant.cmd bootstrap-deferred --complete --json`.

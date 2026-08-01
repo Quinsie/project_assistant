@@ -1,0 +1,4 @@
+interface:
+  display_name: "Assistant Software Workflow"
+  short_description: "Maintain durable software project knowledge"
+  default_prompt: "Use the software workflow to update canonical requirements, designs, tasks, tests, issues, or releases and validate the result."

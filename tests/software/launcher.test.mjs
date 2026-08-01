@@ -12,9 +12,10 @@ const windows = process.platform === "win32";
 const launcher = path.join(packageRoot, windows ? "assistant.cmd" : "assistant");
 
 function runLauncher(args) {
+  const effectiveArgs = args.includes("--json") ? args : [...args, "--json"];
   const result = spawnSync(
     windows ? "cmd.exe" : launcher,
-    windows ? ["/d", "/c", launcher, ...args] : args,
+    windows ? ["/d", "/c", launcher, ...effectiveArgs] : effectiveArgs,
     {
       cwd: packageRoot,
       encoding: "utf8",
@@ -24,7 +25,7 @@ function runLauncher(args) {
   assert.equal(
     result.status,
     0,
-    `command failed: ${args.join(" ")}\nstdout=${result.stdout}\nstderr=${result.stderr}`
+    `command failed: ${effectiveArgs.join(" ")}\nstdout=${result.stdout}\nstderr=${result.stderr}`
   );
   return JSON.parse(result.stdout);
 }

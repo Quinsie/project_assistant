@@ -104,7 +104,9 @@ relying on it. The project and its human collaborators are not blocked. Resolve 
 `agents_control_plane` migration first when present: retain repository-native
 build, test, safety, and subtree rules in AGENTS; move durable assistant
 side-effect preferences to `.assistant/POLICY.md` only when approved; remove
-competing canonical orientation routes only after preview and confirmation.
+any semantically competing current, plan, decision, authorization, policy, or
+routing owner only after preview and confirmation. Never assume fixed
+filenames or directories.
 
 After the migration is confirmed, run
 `.assistant\system\assistant.cmd migration --complete-agents --confirm --json`,
@@ -115,10 +117,27 @@ the persisted profile or model/effort selection and a preserved Codex session
 when one exists. Never downgrade effort, add a timeout, or start a replacement
 semantic attempt without the user's explicit restart instruction and reason.
 
+The runner processes every knowledge-bearing text candidate as stable semantic
+units in resumable batches, then synthesizes from the validated unit ledger.
+Do not bypass incomplete unit coverage, lineage, or closed-book findings by
+opening one legacy master document as fallback authority. Preserve historical
+and superseded requirements, design choices, tests, releases, failures, and
+corrections in bounded canonical owners when they explain the project. A valid
+node count alone is not readiness.
+
+Review every staged `legacy_surfaces` entry by meaning. Preserve
+repository-native build/test instructions, user sources, reports, and ordinary
+project documents in their appropriate role. Preview and obtain approval for
+any competing-surface rewrite/move/removal; do not invent a generic archive.
+Apply an approved `integrate_then_move` or `integrate_then_remove` action before
+resolution because activation refuses a still-present live path.
+
 Ask at most three related semantic questions at a time. After every blocker has
 an explicit answer, create one `assistant.bootstrap-resolution/v1` package with
 one decision per initialization gap/material conflict, declared affected
-candidate IDs, complete unaffected meaning, and a
+candidate IDs, complete unaffected meaning and semantic-unit coverage,
+origin-to-current lineage, resolved control-surface dispositions, a
+closed-book audit with no live legacy dependency, and a
 `canonical_user_approved` decision candidate for each material conflict.
 Confirm the whole material change, then run:
 

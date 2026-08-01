@@ -5,6 +5,8 @@ import path from "node:path";
 import test from "node:test";
 import { activateBootstrap } from "../../runtime/lib/activation.mjs";
 import { validateBootstrapOutput } from "../../runtime/lib/bootstrap-contract.mjs";
+import { buildSemanticEvidenceBatches } from "../../runtime/lib/evidence-packet.mjs";
+import { discoverReferencedControlSurfaces } from "../../runtime/lib/legacy-surfaces.mjs";
 import { SOFTWARE_WORKFLOW_HEADINGS } from "../../runtime/lib/contract.mjs";
 import { doctorProject } from "../../runtime/lib/doctor.mjs";
 import { authorizeTerminalEpisode } from "../../runtime/lib/episode.mjs";
@@ -34,6 +36,7 @@ import {
   uninstallAssistant
 } from "../../runtime/lib/lifecycle.mjs";
 import { updateAssistant } from "../../runtime/lib/updater.mjs";
+import { checkAvailableUpdate } from "../../runtime/lib/version-check.mjs";
 
 const sections = (type, overrides = {}) =>
   (SOFTWARE_WORKFLOW_HEADINGS[type] ?? []).map((heading) => ({
@@ -154,6 +157,28 @@ function softwareOutput() {
       )
     ],
     coverage_groups: [],
+    semantic_coverage: [],
+    legacy_surfaces: [],
+    lineage: {
+      origin_ids: ["FND-SW-001"],
+      ordered_stage_ids: [
+        "REQ-SW-001",
+        "DESIGN-SW-001",
+        "TASK-SW-001",
+        "TEST-SW-001"
+      ],
+      current_ids: ["ISSUE-SW-001", "RELEASE-SW-001"],
+      complete: true,
+      missing: []
+    },
+    closed_book_audit: {
+      origin_to_current_explainable: true,
+      current_authorization_explainable: true,
+      hypotheses_explainable: true,
+      decisions_explainable: true,
+      live_legacy_dependencies: [],
+      missing_concerns: []
+    },
     gaps: [],
     conflicts: []
   };
@@ -318,6 +343,147 @@ test("software bootstrap contract rejects research-only nodes and reverse edges"
   });
   assert.ok(findings.some((item) => /cannot use verifies as a requirement/.test(item)));
   assert.ok(findings.some((item) => /no valid requirement parent relation/.test(item)));
+});
+
+test("software semantic migration is path-independent and retains middle history", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "assistant-sw-semantic-"));
+  try {
+    const files = new Map([
+      [
+        "notes/product_memory/origin.md",
+        "# Origin\n\nThe service began as a local validator.\n"
+      ],
+      [
+        "wiki/change_records/design.txt",
+        [
+          "# Plan evolution",
+          "",
+          `${"context ".repeat(100)}MIDDLE_DESIGN_SENTINEL ${"detail ".repeat(100)}`,
+          "",
+          "# Decision",
+          "",
+          "The boundary validator replaced controller-level checks."
+        ].join("\n")
+      ],
+      [
+        "meta/runtime-state.json",
+        JSON.stringify({ current_state: "paused", authorization: "not_authorized" })
+      ]
+    ]);
+    const entries = [];
+    for (const [relative, content] of files) {
+      const absolute = path.join(tempRoot, ...relative.split("/"));
+      await mkdir(path.dirname(absolute), { recursive: true });
+      await writeFile(absolute, content, "utf8");
+      entries.push({
+        path: relative,
+        kind: "file",
+        category: relative.endsWith(".json") ? "config" : "document",
+        size: Buffer.byteLength(content),
+        sha256: "fixture"
+      });
+    }
+    const result = await buildSemanticEvidenceBatches(
+      tempRoot,
+      { summary: { paths: entries.length, files: entries.length }, entries },
+      { unitLimit: 320, batchLimit: 700 }
+    );
+    assert.match(
+      result.batches.map((batch) => batch.packet).join("\n"),
+      /MIDDLE_DESIGN_SENTINEL/
+    );
+    assert.equal(result.manifest.semantic_files, 3);
+    const first = discoverReferencedControlSurfaces(
+      "Read `notes/product_memory/origin.md` before work."
+    );
+    const second = discoverReferencedControlSurfaces(
+      "Read `wiki/start/status.txt` before work."
+    );
+    assert.deepEqual(first[0].roles, second[0].roles);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("software semantic contract rejects history compressed into current work", () => {
+  const output = softwareOutput();
+  output.semantic_coverage = [
+    {
+      unit_id: "SEM-AAAAAAAAAAAAAAAAAAAA",
+      disposition: "consolidated",
+      target_ids: ["TASK-SW-001"],
+      reason: "Compressed into current task"
+    }
+  ];
+  const findings = validateBootstrapOutput(
+    output,
+    { entries: [] },
+    {
+      profile: "software",
+      semanticManifest: {
+        schema: "assistant.semantic-manifest/v1",
+        units: [
+          {
+            unit_id: "SEM-AAAAAAAAAAAAAAAAAAAA",
+            path: "기록/이전설계.md",
+            control_roles: ["history"]
+          }
+        ],
+        control_candidate_paths: []
+      },
+      semanticLedger: {
+        schema: "assistant.semantic-ledger/v1",
+        batches: [
+          {
+            unit_analyses: [
+              {
+                unit_id: "SEM-AAAAAAAAAAAAAAAAAAAA",
+                classification: "historical_or_superseded",
+                semantic_roles: ["history"],
+                exact_elements: ["release-v1"]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  );
+  assert.ok(findings.some((finding) => /history meaning lacks/.test(finding)));
+  assert.ok(findings.some((finding) => /exact element is absent/.test(finding)));
+});
+
+test("software update check runs once per interactive session", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "assistant-sw-version-"));
+  const target = path.join(tempRoot, "project");
+  try {
+    await initializeBlankProject(target);
+    let calls = 0;
+    const fetchImpl = async () => {
+      calls += 1;
+      return {
+        ok: true,
+        json: async () => ({ tag_name: "v0.1.0" })
+      };
+    };
+    await checkAvailableUpdate(target, {
+      fetchImpl,
+      sessionId: "software-session-a",
+      now: Date.parse("2026-08-02T00:00:00Z")
+    });
+    await checkAvailableUpdate(target, {
+      fetchImpl,
+      sessionId: "software-session-a",
+      now: Date.parse("2026-08-02T00:01:00Z")
+    });
+    await checkAvailableUpdate(target, {
+      fetchImpl,
+      sessionId: "software-session-b",
+      now: Date.parse("2026-08-02T00:02:00Z")
+    });
+    assert.equal(calls, 2);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test("existing software bootstrap activates bounded owners and survives source masking", async () => {

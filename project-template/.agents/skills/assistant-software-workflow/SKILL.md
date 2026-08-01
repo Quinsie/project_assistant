@@ -106,6 +106,15 @@ build, test, safety, and subtree rules in AGENTS; move durable assistant
 side-effect preferences to `.assistant/POLICY.md` only when approved; remove
 competing canonical orientation routes only after preview and confirmation.
 
+After the migration is confirmed, run
+`.assistant\system\assistant.cmd migration --complete-agents --confirm --json`,
+then continue the same bootstrap with
+`.assistant\system\assistant.cmd init --json` on Windows or
+`.assistant/system/assistant init --json` on POSIX. The installed runner uses
+the persisted profile or model/effort selection and a preserved Codex session
+when one exists. Never downgrade effort, add a timeout, or start a replacement
+semantic attempt without the user's explicit restart instruction and reason.
+
 Ask at most three related semantic questions at a time. After every blocker has
 an explicit answer, create one `assistant.bootstrap-resolution/v1` package with
 one decision per initialization gap/material conflict, declared affected
@@ -113,8 +122,9 @@ candidate IDs, complete unaffected meaning, and a
 `canonical_user_approved` decision candidate for each material conflict.
 Confirm the whole material change, then run:
 
-`.assistant\system\assistant.cmd bootstrap-resolve --input <exact-json-path> --confirm`
+`.assistant\system\assistant.cmd bootstrap-resolve --input <exact-json-path> --confirm --json`
 
 For gap-only resolution, omit `--confirm`. After activation, claim and resume
-the durable deferred first request with `bootstrap-deferred --claim`, then mark
-it complete only after its durable state is recorded.
+the durable deferred first request with `bootstrap-deferred --claim --json`,
+then mark it complete with `bootstrap-deferred --complete --json` only after
+its durable state is recorded.

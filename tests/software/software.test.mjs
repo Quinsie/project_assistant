@@ -28,6 +28,12 @@ import {
   loadCanonicalNodes,
   validateProject
 } from "../../runtime/lib/validator.mjs";
+import {
+  exportAssistant,
+  purgeAssistant,
+  uninstallAssistant
+} from "../../runtime/lib/lifecycle.mjs";
+import { updateAssistant } from "../../runtime/lib/updater.mjs";
 
 const sections = (type, overrides = {}) =>
   (SOFTWARE_WORKFLOW_HEADINGS[type] ?? []).map((heading) => ({
@@ -792,6 +798,68 @@ test("software lifecycle resumes through failure, repair, verification, release,
     ]) {
       assert.equal(routedIds.has(id), true, id);
     }
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("software lifecycle commands preserve project assets and target the software skill", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "assistant-sw-purge-"));
+  const target = path.join(tempRoot, "project");
+  try {
+    await mkdir(path.join(target, "docs"), { recursive: true });
+    await writeFile(path.join(target, "app.js"), "export const value = 1;\n", "utf8");
+    await writeFile(path.join(target, "docs", "notes.md"), "human notes\n", "utf8");
+    await initializeProject(target);
+    assert.equal(
+      await pathExists(
+        path.join(target, ".agents", "skills", "assistant-software-workflow")
+      ),
+      true
+    );
+    await writeFile(path.join(target, "app.js"), "export const value = 2;\n", "utf8");
+    await writeFile(path.join(target, "docs", "notes.md"), "updated\n", "utf8");
+    assert.equal((await purgeAssistant(target)).status, "preview");
+    assert.equal((await purgeAssistant(target, { confirmed: true })).status, "completed");
+    assert.equal(await pathExists(path.join(target, ".assistant")), false);
+    assert.equal(await pathExists(path.join(target, ".agents")), false);
+    assert.equal(await pathExists(path.join(target, ".codex")), false);
+    assert.equal(await readFile(path.join(target, "app.js"), "utf8"), "export const value = 2;\n");
+    assert.equal(await readFile(path.join(target, "docs", "notes.md"), "utf8"), "updated\n");
+    assert.equal(
+      await pathExists(
+        path.join(target, ".agents", "skills", "assistant-software-workflow")
+      ),
+      false
+    );
+    assert.equal((await initializeProject(target)).initialization_status, "bootstrap_incomplete");
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("software update, export, and uninstall preserve profile continuity", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "assistant-sw-update-"));
+  const target = path.join(tempRoot, "project");
+  const output = path.join(tempRoot, "export");
+  try {
+    await initializeBlankProject(target);
+    const manifestPath = path.join(target, ".assistant", "manifest.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    assert.match(manifest.update_origin, /project_assistant/);
+    manifest.system_version = "0.0.0-test";
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    const updated = await updateAssistant(target);
+    assert.equal(updated.status, "completed");
+    assert.equal(updated.to_version, "0.1.0-dev");
+    assert.equal((await exportAssistant(target, output)).status, "completed");
+    assert.equal(
+      JSON.parse(await readFile(path.join(output, "manifest.json"), "utf8")).profile,
+      "software"
+    );
+    assert.equal((await uninstallAssistant(target, { confirmed: true })).status, "completed");
+    assert.equal(await pathExists(path.join(target, ".assistant", "POLICY.md")), true);
+    assert.equal(await pathExists(path.join(target, ".assistant", "system")), false);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

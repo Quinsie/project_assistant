@@ -99,7 +99,8 @@ comparison alone must not update canonical state.
 ## Existing-project bootstrap resolution
 
 When `CURRENT.md` names `BOOTSTRAP-EXISTING` and
-`awaiting_user_input`, block normal project work. Resolve an
+`awaiting_user_input`, pause assistant-managed canonical integration before
+relying on it. The project and its human collaborators are not blocked. Resolve an
 `agents_control_plane` migration first when present: retain repository-native
 build, test, safety, and subtree rules in AGENTS; move durable assistant
 side-effect preferences to `.assistant/POLICY.md` only when approved; remove

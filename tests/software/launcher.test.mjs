@@ -74,7 +74,10 @@ test("software migration stops before model work and installed CLI gives a human
     for (const relative of [
       "lib/bootstrap.mjs",
       "lib/evidence-packet.mjs",
+      "lib/legacy-surfaces.mjs",
+      "prompts/bootstrap-batch-v1.md",
       "prompts/bootstrap-discovery-v1.md",
+      "schemas/bootstrap-batch-output.schema.json",
       "schemas/bootstrap-discovery.schema.json",
       "schemas/bootstrap-output.schema.json"
     ]) {

@@ -452,6 +452,114 @@ test("software semantic contract rejects history compressed into current work", 
   assert.ok(findings.some((finding) => /exact element is absent/.test(finding)));
 });
 
+test("software semantic migration exposes document-code classification conflicts", async () => {
+  const tempRoot = await mkdtemp(
+    path.join(os.tmpdir(), "assistant-sw-document-code-conflict-")
+  );
+  try {
+    const plannedPath = "planning/classification.md";
+    const activePath = "src/active_release.py";
+    const planned = [
+      "# Release plan",
+      "",
+      "The approved release classification is RELEASE-LEGACY."
+    ].join("\n");
+    const active = 'RELEASE_CLASSIFICATION = "RELEASE-ACTIVE"\n';
+    await mkdir(path.join(tempRoot, "planning"), { recursive: true });
+    await mkdir(path.join(tempRoot, "src"), { recursive: true });
+    await writeFile(path.join(tempRoot, plannedPath), planned, "utf8");
+    await writeFile(path.join(tempRoot, activePath), active, "utf8");
+    const evidence = await buildSemanticEvidenceBatches(
+      tempRoot,
+      {
+        summary: { paths: 2, files: 2 },
+        entries: [
+          {
+            path: plannedPath,
+            kind: "file",
+            category: "document",
+            size: Buffer.byteLength(planned),
+            sha256: "planned"
+          },
+          {
+            path: activePath,
+            kind: "file",
+            category: "code",
+            size: Buffer.byteLength(active),
+            sha256: "active"
+          }
+        ]
+      }
+    );
+    const packet = evidence.batches.map((batch) => batch.packet).join("\n");
+    assert.match(packet, /RELEASE-LEGACY/);
+    assert.match(packet, /RELEASE-ACTIVE/);
+
+    const semanticLedger = {
+      schema: "assistant.semantic-ledger/v1",
+      batches: evidence.batches.map((batch) => ({
+        unit_analyses: batch.unit_ids.map((unit_id) => {
+          const unit = evidence.manifest.units.find(
+            (candidateUnit) => candidateUnit.unit_id === unit_id
+          );
+          const plannedUnit = unit.path === plannedPath;
+          return {
+            unit_id,
+            classification: "canonical_knowledge_candidate",
+            semantic_roles: plannedUnit ? ["plan"] : ["current"],
+            exact_elements: [
+              plannedUnit ? "RELEASE-LEGACY" : "RELEASE-ACTIVE"
+            ],
+            conflict_candidates: [
+              "The planned and active release classifications disagree."
+            ]
+          };
+        })
+      }))
+    };
+    const output = softwareOutput();
+    const targetId = "WORK-SW-CONFLICT-001";
+    output.candidate_nodes = [
+      candidate(targetId, "work", [], {
+        status: "blocked",
+        body:
+          "The plan says RELEASE-LEGACY while active code says RELEASE-ACTIVE.",
+        evidence_paths: [plannedPath, activePath]
+      })
+    ];
+    output.semantic_coverage = evidence.manifest.units.map((unit) => ({
+      unit_id: unit.unit_id,
+      disposition: "consolidated",
+      target_ids: [targetId],
+      reason: "Both observations were retained."
+    }));
+    output.lineage = {
+      origin_ids: [targetId],
+      ordered_stage_ids: [],
+      current_ids: [targetId],
+      complete: true,
+      missing: []
+    };
+    output.conflicts = [];
+    const findings = validateBootstrapOutput(
+      output,
+      { entries: [] },
+      {
+        profile: "software",
+        semanticManifest: evidence.manifest,
+        semanticLedger
+      }
+    );
+    assert.ok(
+      findings.some((finding) =>
+        /unrepresented conflict candidates/.test(finding)
+      )
+    );
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("software update check runs once per interactive session", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "assistant-sw-version-"));
   const target = path.join(tempRoot, "project");
